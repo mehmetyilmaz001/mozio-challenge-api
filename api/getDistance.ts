@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { cities } from './cities';
 import { calculateDistance } from './utils';
+import { Range } from './types';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   const { cities = "" } = req.query;
@@ -10,13 +11,13 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   // const cityNames = ["Grenoble", "Dijon", "Nîmes"];
   const totalDistance = calculateTripDistance(cities.split(','));
   return res.json({
-    totalDistance
+    result: totalDistance
   })
 }
 
-
 function calculateTripDistance(cityNames) {
   let totalDistance = 0;
+  const ranges:Range[] = [];
 
   for (let i = 0; i < cityNames.length - 1; i++) {
     const startCity = cities.find(city => city.name === cityNames[i]);
@@ -27,7 +28,17 @@ function calculateTripDistance(cityNames) {
     }
     const distance = calculateDistance(startCity.latitude, startCity.longitude, endCity.latitude, endCity.longitude);
     totalDistance += distance;
+
+    ranges.push({
+      from: startCity.name,
+      to: endCity.name,
+      distance
+    })
   }
 
-  return totalDistance.toFixed(2); // Return total distance rounded to 2 decimal places
+  return {
+    ranges,
+    totalDistance: totalDistance.toFixed(2)
+  }
+
 }

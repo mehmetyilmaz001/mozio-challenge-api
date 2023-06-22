@@ -105,7 +105,25 @@ export const cities = [
   
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
+  const cityName = req.query.name;
+  let foundCities = cities;
+  
+  if (cityName && typeof cityName !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid name'
+    })
+   
+  } else if (cityName !== undefined) {
+    foundCities = cities.filter(city => city.name.toLowerCase().includes(cityName.toLowerCase()))
+  }
+
+  if (foundCities.length === 0){
+    return res.status(404).json({
+      error: 'City not found'
+    })
+}   
+
   return res.json({
-    cities: cities.filter(city => city.name.toLowerCase().includes(req.query.name as string))
+    cities: foundCities
   })
 }
